@@ -1,0 +1,114 @@
+ const { data: session, status } = useSession();
+//   const router = useRouter();
+
+//   const [vehicles, setVehicles] = useState<VehicleType[]>([]);
+//   const [bookings, setBookings] = useState<BookingType[]>([]);
+//   const [user, setUser] = useState<any>(null);
+
+//   useEffect(() => {
+//     if (status === "unauthenticated") {
+//       router.push("/auth/login");
+//     }
+//   }, [status, router]);
+
+//   useEffect(() => {
+//     const fetchUser = async () => {
+//       const res = await fetch("/api/user/my");
+//       const data = await res.json();
+//       setUser(data);
+//     };
+//     if (status === "authenticated") {
+//       fetchUser();
+//     }
+//   }, [status]);
+
+  
+//   useEffect(() => {
+//     const fetchVehicles = async () => {
+//       const res = await fetch("/api/vehicles/my");
+//       const data = await res.json();
+//       setVehicles(data);
+//     };
+//     if (status === "authenticated" && session?.user?.role === "user") {
+//       fetchVehicles();
+//     }
+//   }, [status, session]);
+
+
+//   useEffect(() => {
+//     const fetchBookings = async () => {
+//       const res = await fetch("/api/bookings/my" );
+//       if (!res.ok) return;
+//       const data = await res.json();
+//       setBookings(data);
+//     };
+
+//       fetchBookings();
+
+//   }, []);
+//  const deleteUser = async()=>{
+//   try{
+//   const data = await fetch("/api/user/delete",{
+//     method:"DELETE"
+//   });
+//   if(data.ok){
+//       alert("user deleted")
+//       signOut({callbackUrl :"/"})
+      
+//   }
+//   if(!data.ok){
+//       alert("user not deleted")
+      
+//   }
+// }
+//   catch(e){
+//     alert(`failed to delete user ${e}`)
+//   }
+//  }
+//   if (status === "loading") {
+//     return <div className="text-center text-white mt-10">Loading...</div>;
+//   }
+// if(session?.user.role === "provider") redirect("/dashboard/provider")
+//   return (
+//     <>
+//       <div className="flex flex-col items-center justify-center gap-4 mt-20 text-black">
+//         <h1 className="text-3xl">Hello, {session?.user?.name}</h1>
+//         <h2 className="text-lg capitalize">Role: {session?.user?.role}</h2>
+//         <Signout />
+//         <button onClick={deleteUser}>Delete account</button>
+//       </div>
+
+      
+     
+
+      
+//       <div className="w-full flex flex-col items-center mt-16">
+//         <h2 className="text-2xl text-black mb-4">Your Bookings</h2>
+        
+//           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-[70%] text-white">
+//             {bookings.map((booking) => (
+//               <div
+//                 key={booking._id}
+//                 className="bg-gray-800 p-4 rounded-xl flex flex-col gap-4"
+//               >
+//                 <p><strong>Name:</strong> {booking.name}</p>
+//                 <p><strong>Email:</strong> {booking.email}</p>
+//                 <p><strong>Phone:</strong> {booking.phone}</p>
+//                 <p><strong>Address:</strong> {booking.address}</p>
+//                 <p><strong>Vehicle Name:</strong> {booking.vehicle_name}</p>
+//                <p><strong>Start Date:</strong> {(booking.startDate).toString().split('T')[0]}</p>
+//                 <p><strong>End Date:</strong> {(booking.endDate).toString().split('T')[0]}</p>
+//                 <p><strong>Total Price:</strong> {booking.totalprice}</p>
+//                 <p><strong>Payment Method:</strong> {booking.paymentmethod}</p>
+//                 <p><strong>Delivery Status:</strong> {booking.Delivery_status}</p>
+//                 <div className="flex flex-row items-center align-middle gap-2">
+//                   <button className="bg-white text-gray-800 p-2 rounded">Cancel</button>
+//                   <button className="bg-white text-gray-800 p-2 rounded">Received</button>
+//                 </div>
+//               </div>
+//             ))}
+//           </div>
+        
+//       </div>
+//     </>
+//   );
