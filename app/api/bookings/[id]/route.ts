@@ -1,14 +1,62 @@
 import { connectDataBase } from "@/lib/db";
-import bookings from "@/models/booking";
+import booking from "@/models/booking";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+
+export async function POST(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+): Promise<NextResponse> {
+  try {
+    await connectDataBase();
+
+    const { id } = await params;
+    const { status } = await req.json();
+    console.log("Updating booking:", id, "to status:", status);
+
+    // Fetch current booking
+    const existingBooking = await booking.findById(id);
+    if (!existingBooking) {
+      return NextResponse.json(
+        { message: "Booking not found" },
+        { status: 404 }
+      );
+    }
+
+    // Prevent redundant updates
+    if (existingBooking.Delivery_status === status) {
+      return NextResponse.json(
+        { message: "Status is already the same. No update needed." },
+        { status: 200 }
+      );
+    }
+
+    // Update booking status
+    const updatedBooking = await booking.findByIdAndUpdate(
+      id,
+      { Delivery_status: status },
+      { new: true }
+    );
+
+    return NextResponse.json({
+      message: "Status updated successfully",
+      updatedBooking
+    });
+  } catch (error) {
+    console.error("Error updating booking:", error);
+    return NextResponse.json(
+      { message: `Failed to update booking: ${error}` },
+      { status: 500 }
+    );
+  }
+}
 
 export async function DELETE(
   req: NextRequest,
   context: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
-  const { id } = await context.params; // Await because params can be a Promise
+  const { id } = await context.params;
 
   await connectDataBase();
 
@@ -28,7 +76,7 @@ export async function DELETE(
       return NextResponse.json({ message: "Forbidden" }, { status: 403 });
     }
 
-    const updatedBooking = await bookings.findOneAndUpdate(
+    const updatedBooking = await booking.findOneAndUpdate(
       { _id: id },
       { $set: updateField },
       { new: true }
@@ -43,7 +91,7 @@ export async function DELETE(
       (updatedBooking.userDeleted && updatedBooking.providerDeleted) ||
       (updatedBooking.providerasUserDeleted && updatedBooking.providerDeleted)
     ) {
-      const deletedBooking = await bookings.findOneAndDelete({ _id: id });
+      const deletedBooking = await booking.findOneAndDelete({ _id: id });
       return NextResponse.json({
         message: "Booking fully deleted",
         data: deletedBooking,
@@ -61,4 +109,3 @@ export async function DELETE(
     );
   }
 }
-// This code handles the deletion of bookings by updating the status based on the user's role.

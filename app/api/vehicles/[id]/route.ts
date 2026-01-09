@@ -17,7 +17,7 @@ export async function POST(
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const { id } = await params; // ✅ Extract ID after awaiting params
+    const { id } = await params;
     const body = await req.json();
     console.log("Update body:", body);
 
@@ -37,6 +37,45 @@ export async function POST(
     console.error("Error updating vehicle:", error);
     return NextResponse.json(
       { message: `Failed to update vehicle: ${error}` },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> }
+): Promise<NextResponse> {
+  try {
+    await connectDataBase();
+
+    const { id } = await context.params;
+
+    if (!id) {
+      return NextResponse.json(
+        { message: "Vehicle ID is required" },
+        { status: 400 }
+      );
+    }
+
+    // Delete the vehicle
+    const deletedItem = await Vehicle.findByIdAndDelete(id);
+
+    if (!deletedItem) {
+      return NextResponse.json(
+        { message: "Vehicle not found" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({
+      message: "Vehicle deleted successfully",
+      deletedVehicle: deletedItem,
+    });
+  } catch (error) {
+    console.error("Error deleting vehicle:", error);
+    return NextResponse.json(
+      { message: `Failed to delete vehicle: ${error}` },
       { status: 500 }
     );
   }
