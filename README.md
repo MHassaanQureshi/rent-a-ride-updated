@@ -28,7 +28,7 @@ yarn install
 set up .env.local file
 
 # MongoDB
-MONGODB_URI=mongodb+srv://<username>:<password>@cluster0.ksogz0t.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+MONGODB_URL=mongodb+srv://<username>:<password>@cluster0.ksogz0t.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
 
 # NextAuth
 NEXTAUTH_SECRET=your_nextauth_secret

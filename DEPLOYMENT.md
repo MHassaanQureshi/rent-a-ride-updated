@@ -31,7 +31,7 @@
    Add the following environment variables in Vercel:
 
    ```
-   MONGODB_URI=mongodb+srv://<username>:<password>@cluster0.xxxxx.mongodb.net/?retryWrites=true&w=majority
+   MONGODB_URL=mongodb+srv://<username>:<password>@cluster0.xxxxx.mongodb.net/?retryWrites=true&w=majority
    NEXTAUTH_SECRET=<your-secret-key>
    NEXTAUTH_URL=https://your-domain.vercel.app
    ```
@@ -103,7 +103,7 @@
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `MONGODB_URI` | MongoDB connection string | `mongodb+srv://user:pass@cluster.mongodb.net/` |
+| `MONGODB_URL` | MongoDB connection string | `mongodb+srv://user:pass@cluster.mongodb.net/` |
 | `NEXTAUTH_SECRET` | Secret for JWT encryption | Generated with `openssl rand -base64 32` |
 | `NEXTAUTH_URL` | Your production URL | `https://your-app.vercel.app` |
 

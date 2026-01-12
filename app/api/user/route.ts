@@ -76,10 +76,16 @@ export async function POST(request: NextRequest) {
       const existingUser = await User.findOne({ email });
 
       if (existingUser) {
-        return NextResponse.json({ message: "already exist" });
+        return NextResponse.json({ message: "already exist" }, { status: 409 }); // Conflict status
       }
-      const user = await User.create({ name, email, phone, role, password, address });
-      return NextResponse.json({ message: "created", data: user });
+
+      try {
+        const user = await User.create({ name, email, phone, role, password, address });
+        return NextResponse.json({ message: "created", data: user }, { status: 201 });
+      } catch (error) {
+        console.error("Error creating user:", error);
+        return NextResponse.json({ message: "Failed to create user" }, { status: 500 });
+      }
     }
   } catch (error) {
     console.error("Error processing user request:", error);

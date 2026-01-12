@@ -62,30 +62,57 @@ export default function Provider() {
 {/*fetching user API call*/}
   useEffect(() => {
     const fetchUser = async () => {
-      const res = await fetch("/api/user/my");
-      const data = await res.json();
-      setUser(data);
-      setLoading(false)
+      try {
+        const res = await fetch("/api/user/my");
+
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => ({ error: 'Unknown error' }));
+          console.error('Error fetching user:', errorData);
+          setUser(null);
+          return;
+        }
+
+        const data = await res.json();
+        setUser(data);
+      } catch (error) {
+        console.error('Network error while fetching user:', error);
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
     };
     if (status === "authenticated") {
       fetchUser();
-
     }
-    
+
   }, [status]);
 
   {/*fetching vehicle API call*/}
   useEffect(() => {
     const fetchVehicles = async () => {
-      const res = await fetch("/api/vehicles/my");
-      const data = await res.json();
-      setVehicles(data);
-      setLoading(false)
+      try {
+        const res = await fetch("/api/vehicles/my");
+
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => ({ error: 'Unknown error' }));
+          console.error('Error fetching vehicles:', errorData);
+          setVehicles([]);
+          return;
+        }
+
+        const data = await res.json();
+        setVehicles(data);
+      } catch (error) {
+        console.error('Network error while fetching vehicles:', error);
+        setVehicles([]); // Set empty array to prevent further errors
+      } finally {
+        setLoading(false);
+      }
     };
     if (status === "authenticated" && session?.user?.role === "provider") {
       fetchVehicles();
     }
-    
+
   }, [status, session]);
 
   
@@ -96,24 +123,33 @@ export default function Provider() {
 {/*delete vehicle API call*/}
   const deleteVehicle = async(id:string)=>{
     try{
-    const data = await fetch(`/api/vehicles/delete/${id}`,{
-      method:"DELETE"
-    });
-    if(data.ok){
-        alert("vehicle deleted")
-      
-        
+      const response = await fetch(`/api/vehicles/${id}`,{
+        method:"DELETE"
+      });
+
+      if(response.ok){
+        alert("Vehicle deleted successfully");
+        // Refresh the vehicles list
+        const updatedVehicles = vehicles.filter(vehicle => vehicle._id !== id);
+        setVehicles(updatedVehicles);
+      } else {
+        // Try to get error message from response
+        let errorMessage = "Vehicle not deleted";
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorMessage;
+        } catch (e) {
+          // If response is not JSON, use default message
+        }
+        alert(errorMessage);
+      }
     }
-    if(!data.ok){
-        alert("vehicle not deleted")
-        
-    }
-  }
     catch(e){
-      alert(`failed to delete user ${e}`)
+      alert(`Failed to delete vehicle: ${e}`);
+      console.error("Error deleting vehicle:", e);
     }
     finally{
-      setLoading(false)
+      setLoading(false);
     }
    }
    

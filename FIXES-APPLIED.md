@@ -154,7 +154,7 @@ Total: 33 routes
 For deployment, set these environment variables in Vercel:
 
 ```
-MONGODB_URI=<your-mongodb-connection-string>
+MONGODB_URL=<your-mongodb-connection-string>
 NEXTAUTH_SECRET=<generate-with-openssl>
 NEXTAUTH_URL=<your-vercel-deployment-url>
 ```

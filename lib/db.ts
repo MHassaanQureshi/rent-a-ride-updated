@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
-const MONGOOSE_URI = process.env.MONGODB_URI;
-if (!MONGOOSE_URI) {
-    throw new Error("please connect mongoose uri first");
+const MONGODB_URL = process.env.MONGODB_URL;
+if (!MONGODB_URL) {
+    throw new Error("please connect mongoose url first");
 
 }
 
@@ -18,7 +18,7 @@ export const connectDataBase = async() => {
     }
 
     if(!cached.promise){
-       cached.promise = mongoose.connect(MONGOOSE_URI,
+       cached.promise = mongoose.connect(MONGODB_URL,
         {
            dbName:"rentcar"
         },
@@ -43,7 +43,7 @@ export const connectDataBase = async() => {
 //        if(mongoose.connection.readyState >=1){
 //         return;
 //        }
-//        await mongoose.connect(MONGOOSE_URI || "")
+//        await mongoose.connect(MONGODB_URL || "")
       
 //     }
 //     catch(err){

@@ -16,6 +16,7 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
+
   if (session) {
     return (
       <div className="min-h-screen pt-20 pb-12 bg-gradient-to-br from-gray-900 via-gray-800 to-black flex items-center justify-center px-4">
@@ -55,19 +56,38 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      const data = await signIn("credentials", {
+      const res = await signIn("credentials", {
         email,
         password,
-        redirect: false,
+        redirect: false, // Keep redirect false to stay on the page
       });
 
-      if (data?.ok) {
-        router.push(`/listing`);
-      } else {
-        setError("Invalid email or password. Please try again.");
+      if (res?.error) {
+        // NextAuth adds error codes to the response
+        switch(res.error) {
+          case 'CredentialsSignin':
+            setError('Invalid email or password. Please try again.');
+            break;
+          case 'Configuration':
+            setError('Authentication configuration error. Please contact support.');
+            break;
+          case 'AccessDenied':
+            setError('Access denied. Please verify your credentials.');
+            break;
+          case 'Default':
+            setError('An authentication error occurred. Please try again.');
+            break;
+          default:
+            setError(res.error || 'Authentication failed. Please try again.');
+        }
+      }
+
+      if (res?.ok) {
+        router.push('/listing');
       }
     } catch (e) {
       setError("An error occurred. Please try again later.");
+      console.error("Sign in error:", e);
     } finally {
       setIsLoading(false);
     }

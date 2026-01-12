@@ -5,6 +5,7 @@ import bookings from "@/models/booking";
 import { NextRequest, NextResponse } from "next/server";
 import { authOptions } from "@/lib/auth";
 import { ObjectId } from "mongodb";
+import mongoose from "mongoose";
 
 export async function GET(request: NextRequest) {
   try {
@@ -24,11 +25,25 @@ export async function GET(request: NextRequest) {
       try {
         await connectDataBase();
 
-        const vehicles = await Vehicle.find({ provider_id: session.user.id });
+        // Validate the session user ID before converting to ObjectId
+        if (!mongoose.Types.ObjectId.isValid(session.user.id)) {
+          console.error("Invalid user ID in session:", session.user.id);
+          return NextResponse.json({ error: "Invalid user ID" }, { status: 400 });
+        }
+
+        // Convert session user ID to ObjectId for comparison
+        const userIdAsObjectId = new mongoose.Types.ObjectId(session.user.id);
+        const vehicles = await Vehicle.find({ provider_id: userIdAsObjectId });
 
         return NextResponse.json(vehicles);
       } catch (err) {
-        console.error(err);
+        console.error("Error fetching vehicles:", err);
+
+        // If it's an ObjectId conversion error, return a specific message
+        if (err instanceof Error && err.name === 'CastError') {
+          return NextResponse.json({ error: "Invalid user ID format" }, { status: 400 });
+        }
+
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
       }
     } else if (action === 'filter') {

@@ -14,24 +14,53 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
+        console.log("Authorize function called with credentials:", credentials?.email); // Debug log
+
         if (!credentials?.email || !credentials?.password) {
+          console.log("Missing email or password"); // Debug log
           throw new Error("Missing email or password");
         }
 
-        await connectDataBase();
+        try {
+          await connectDataBase();
+          console.log("Database connected successfully"); // Debug log
+        } catch (error) {
+          console.error("Database connection failed:", error); // Debug log
+          throw new Error("Database connection failed");
+        }
 
-        const user = await User.findOne({ email: credentials.email });
+        let user;
+        try {
+          user = await User.findOne({ email: credentials.email });
+          console.log(`User lookup result: ${user ? 'found' : 'not found'}`); // Debug log
+        } catch (error) {
+          console.error("User lookup failed:", error); // Debug log
+          throw new Error("Database query failed");
+        }
+
         if (!user) {
+          console.log("No user found with this email"); // Debug log
           throw new Error("No user found with this email");
         }
 
-        const isPasswordCorrect = await bcrypt.compare(
-          credentials.password,
-          user.password
-        );
+        let isPasswordCorrect;
+        try {
+          isPasswordCorrect = await bcrypt.compare(
+            credentials.password,
+            user.password
+          );
+          console.log(`Password comparison result: ${isPasswordCorrect}`); // Debug log
+        } catch (error) {
+          console.error("Password comparison failed:", error); // Debug log
+          throw new Error("Password validation failed");
+        }
+
         if (!isPasswordCorrect) {
+          console.log("Invalid password provided"); // Debug log
           throw new Error("Invalid password");
         }
+
+        console.log("User authenticated successfully"); // Debug log
 
         return {
           id: user._id.toString(),
@@ -49,6 +78,10 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
   },
   callbacks: {
+    async signIn({ user, account, profile, email, credentials }) {
+      // This callback runs after successful authorization but before session creation
+      return true;
+    },
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
