@@ -80,17 +80,50 @@ export default function BookingReceived(){
     new Date(dateString).toLocaleDateString();
       useEffect(() => {
           const fetchBookingsreceived = async () => {
-            const res = await fetch("/api/bookings/byid");
-            if (!res.ok) return;
-            const data = await res.json();
-            setBookingsreceived(data);
-            setLoading(false)
+            try {
+              const res = await fetch("/api/bookings/byid");
+
+              if (!res.ok) {
+                console.error('Error fetching bookings by ID:', res.status, await res.text().catch(() => 'Unable to read error response'));
+                setBookingsreceived([]);
+                setLoading(false);
+                return;
+              }
+
+              const responseText = await res.text();
+
+              if (!responseText) {
+                console.warn('Empty response from bookings by ID API');
+                setBookingsreceived([]);
+                setLoading(false);
+                return;
+              }
+
+              try {
+                const data = JSON.parse(responseText);
+                // Only set bookings if data exists and is an array
+                if (Array.isArray(data)) {
+                  setBookingsreceived(data);
+                } else {
+                  console.warn('Bookings by ID API did not return an array');
+                  setBookingsreceived([]);
+                }
+              } catch (parseError) {
+                console.error('Error parsing bookings by ID data:', parseError);
+                setBookingsreceived([]);
+              }
+            } catch (error) {
+              console.error('Network error while fetching bookings by ID:', error);
+              setBookingsreceived([]);
+            } finally {
+              setLoading(false);
+            }
           };
-         
+
             fetchBookingsreceived();
-           
-          
-          
+
+
+
         }, []);
     const updateVehicleStatus = async(id:string,status:string,startdate?:string,enddate?:string)=>{
         

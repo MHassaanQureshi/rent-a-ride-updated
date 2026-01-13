@@ -65,15 +65,53 @@ export default function Provider() {
       try {
         const res = await fetch("/api/user/my");
 
+        // Read the response body once
+        const responseText = await res.text();
+
         if (!res.ok) {
-          const errorData = await res.json().catch(() => ({ error: 'Unknown error' }));
-          console.error('Error fetching user:', errorData);
+          // Handle different status codes appropriately
+          if (res.status === 401) {
+            console.error('Unauthorized access - redirecting to login');
+            router.push('/auth/login');
+            return;
+          } else if (res.status === 404) {
+            console.warn('User not found in database');
+            setUser(null);
+          } else {
+            // Try to parse the error response, but handle case where it's empty or malformed
+            let errorData;
+            try {
+              errorData = responseText ? JSON.parse(responseText) : { error: 'Empty response' };
+            } catch (parseError) {
+              console.error('Error parsing response:', parseError);
+              errorData = { error: 'Invalid response format', details: parseError };
+            }
+            console.error('Error fetching user:', errorData);
+            setUser(null);
+          }
+          return;
+        }
+
+        // Parse the successful response
+        if (!responseText) {
+          console.warn('Empty response from user API - setting user as null');
           setUser(null);
           return;
         }
 
-        const data = await res.json();
-        setUser(data);
+        try {
+          const data = JSON.parse(responseText);
+          // Only set user if data exists and is not empty
+          if (data && Object.keys(data).length > 0) {
+            setUser(data);
+          } else {
+            console.warn('User API returned empty data object');
+            setUser(null);
+          }
+        } catch (parseError) {
+          console.error('Error parsing user data:', parseError);
+          setUser(null);
+        }
       } catch (error) {
         console.error('Network error while fetching user:', error);
         setUser(null);
@@ -85,7 +123,7 @@ export default function Provider() {
       fetchUser();
     }
 
-  }, [status]);
+  }, [status, router]);
 
   {/*fetching vehicle API call*/}
   useEffect(() => {
@@ -100,8 +138,27 @@ export default function Provider() {
           return;
         }
 
-        const data = await res.json();
-        setVehicles(data);
+        const responseText = await res.text();
+
+        if (!responseText) {
+          console.warn('Empty response from vehicles API - setting vehicles as empty array');
+          setVehicles([]);
+          return;
+        }
+
+        try {
+          const data = JSON.parse(responseText);
+          // Only set vehicles if data exists and is an array
+          if (Array.isArray(data)) {
+            setVehicles(data);
+          } else {
+            console.warn('Vehicles API did not return an array, setting as empty array');
+            setVehicles([]);
+          }
+        } catch (parseError) {
+          console.error('Error parsing vehicles data:', parseError);
+          setVehicles([]);
+        }
       } catch (error) {
         console.error('Network error while fetching vehicles:', error);
         setVehicles([]); // Set empty array to prevent further errors
@@ -166,14 +223,14 @@ export default function Provider() {
 
   return (
     <>
-      <div className="flex flex-col md:flex-row w-full min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white">
+      <div className="flex flex-col md:flex-row w-full min-h-screen bg-gray-50 text-gray-900">
 
-        <aside className="md:w-1/4 w-full bg-gray-900 text-white p-4">
+        <aside className="md:w-1/4 w-full bg-white text-gray-900 p-4 border-r border-gray-200">
           <DashboardNav />
         </aside>
 
 
-        <main className="md:w-3/4 w-full p-4 overflow-x-auto">
+        <main className="md:w-3/4 w-full p-4 bg-gray-50 min-h-screen">
           <div className="max-w-full">
             {/* Bookings You Have Received */}
            <BookingReceived />
@@ -182,79 +239,77 @@ export default function Provider() {
            <Bookings />
             {/* Vehicles */}
             {session?.user?.role === "provider" && (
-              <section>
-                <h2 className="text-xl md:text-2xl font-semibold text-white mb-4">
+              <section className="mt-10">
+                <h2 className="text-xl md:text-2xl font-semibold text-gray-900 mb-6">
                   Your Vehicles
                 </h2>
-                <div className="overflow-x-auto">
-                  <table className="w-full min-w-[700px] bg-gray-800 rounded-md text-white">
-                    <thead>
-                      <tr>
-                        {[
-                          "Name",
-                          "Model",
-                          "Price",
-                          "Color",
-                          "Start Date",
-                          "End Date",
-                          "Availability",
-                          "Fuel Type",
-                          "Actions",
-                        ].map((head) => (
-                          <th
-                            key={head}
-                            className="p-2 border border-gray-700 text-sm md:text-base whitespace-nowrap"
-                          >
-                            {head}
-                          </th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {vehicles.map((vehicle) => (
-                        <tr key={vehicle._id} className="border-t border-gray-700">
-                          <td className="p-2 border border-gray-700 text-sm md:text-base">
-                            {vehicle.name}
-                          </td>
-                          <td className="p-2 border border-gray-700 text-sm md:text-base">
-                            {vehicle.model}
-                          </td>
-                          <td className="p-2 border border-gray-700 text-sm md:text-base">
-                            {vehicle.price}
-                          </td>
-                          <td className="p-2 border border-gray-700 text-sm md:text-base">
-                            {vehicle.color}
-                          </td>
-                          <td className="p-2 border border-gray-700 text-sm md:text-base">
-                            {formatDate(vehicle.fromavailabilityDate)}
-                          </td>
-                          <td className="p-2 border border-gray-700 text-sm md:text-base">
-                            {formatDate(vehicle.toavailabilityDate)}
-                          </td>
-                          <td className="p-2 border border-gray-700 text-sm md:text-base">
-                            {vehicle.availability}
-                          </td>
-                          <td className="p-2 border border-gray-700 text-sm md:text-base">
-                            {vehicle.fuel_type}
-                          </td>
-                          <td className="p-2 border border-gray-700 flex gap-2 justify-center">
-                            <button className="bg-blue-500 p-1 rounded text-xs md:text-sm">
-                              <Link href={`/editvehicle/${vehicle._id}`}>Update</Link>
-                            </button>
+
+                {vehicles.length === 0 ? (
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
+                    <p className="text-gray-500">No vehicles found. Add your first vehicle!</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {vehicles.map((vehicle) => {
+                      const availabilityColors = {
+                        'available': 'bg-green-100 text-green-800',
+                        'not available': 'bg-red-100 text-red-800',
+                        'maintenance': 'bg-yellow-100 text-yellow-800',
+                        'booked': 'bg-blue-100 text-blue-800',
+                      };
+
+                      return (
+                        <div key={vehicle._id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                          <div className="flex justify-between items-start mb-4">
+                            <h3 className="font-semibold text-gray-900 text-lg">{vehicle.name}</h3>
+                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${availabilityColors[vehicle.availability.toLowerCase()] || 'bg-gray-100 text-gray-800'}`}>
+                              {vehicle.availability}
+                            </span>
+                          </div>
+
+                          <div className="space-y-3 mb-6">
+                            <div className="flex justify-between text-sm">
+                              <span className="text-gray-500">Model</span>
+                              <span className="font-medium">{vehicle.model}</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span className="text-gray-500">Color</span>
+                              <span className="font-medium">{vehicle.color}</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span className="text-gray-500">Fuel Type</span>
+                              <span className="font-medium">{vehicle.fuel_type}</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span className="text-gray-500">Price</span>
+                              <span className="font-medium">${vehicle.price}/day</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span className="text-gray-500">Availability</span>
+                              <span className="font-medium">{formatDate(vehicle.fromavailabilityDate)} - {formatDate(vehicle.toavailabilityDate)}</span>
+                            </div>
+                          </div>
+
+                          <div className="flex gap-2">
+                            <Link href={`/editvehicle/${vehicle._id}`}>
+                              <button className="flex-1 bg-blue-600 text-white py-2 px-3 rounded text-sm hover:bg-blue-700 transition-colors min-w-[80px]">
+                                Update
+                              </button>
+                            </Link>
                             <button
-                              className="bg-red-600 p-1 rounded text-xs md:text-sm"
+                              className="flex-1 bg-red-600 text-white py-2 px-3 rounded text-sm hover:bg-red-700 transition-colors min-w-[80px]"
                               onClick={() => {
                                 deleteVehicle(vehicle._id);
                               }}
                             >
                               Delete
                             </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </section>
             )}
           </div>
