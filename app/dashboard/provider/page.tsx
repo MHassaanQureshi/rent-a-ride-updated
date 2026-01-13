@@ -251,7 +251,7 @@ export default function Provider() {
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {vehicles.map((vehicle) => {
-                      const availabilityColors = {
+                      const availabilityColors: Record<string, string> = {
                         'available': 'bg-green-100 text-green-800',
                         'not available': 'bg-red-100 text-red-800',
                         'maintenance': 'bg-yellow-100 text-yellow-800',

@@ -176,7 +176,7 @@ if(loading) return <Loader />
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {bookings.map((booking) => {
-                  const statusColors = {
+                  const statusColors: Record<string, string> = {
                     'Booked Waiting for initial Payment': 'bg-amber-100 text-amber-800',
                     'Booked Waiting for Confirmation': 'bg-blue-100 text-blue-800',
                     'Accepted Waiting for Delivery': 'bg-indigo-100 text-indigo-800',
