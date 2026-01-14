@@ -5,6 +5,7 @@ import { authOptions } from "@/lib/auth";
 import vehicle from "@/models/vehicle";
 import bookings from "@/models/booking";
 import User from "@/models/user";
+import mongoose from "mongoose";
 
 export async function GET(request: NextRequest) {
   try {
@@ -15,55 +16,97 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { pathname } = new URL(request.url);
-    const pathSegments = pathname.split('/');
-    const action = pathSegments[pathSegments.length - 1];
+    const url = new URL(request.url);
+    const pathname = url.pathname;
+    // Get the last non-empty segment as the action
+    const pathSegments = pathname.split('/').filter(segment => segment !== '');
+    const action = pathSegments[pathSegments.length - 1] || '';
 
     if (action === 'byid') {
-      // Handle bookings by provider ID
+      // Handle bookings by provider ID - bookings made to provider's vehicles
       if (session.user.role === "provider") {
         try {
           await connectDataBase();
 
-          const vehicles = await bookings.find({
-            provider_id: session.user.id,
+          // Validate and convert session user ID to ObjectId for comparison
+          if (!mongoose.Types.ObjectId.isValid(session.user.id)) {
+            console.error("Invalid user ID in session:", session.user.id);
+            return NextResponse.json({ error: "Invalid user ID" }, { status: 400 });
+          }
+
+          const userIdAsObjectId = new mongoose.Types.ObjectId(session.user.id);
+          const bookingsReceived = await bookings.find({
+            provider_id: userIdAsObjectId,
             providerDeleted: false,
           });
 
-          return NextResponse.json(vehicles);
+          return NextResponse.json(bookingsReceived);
         } catch (err) {
           console.error(err);
+
+          // If it's an ObjectId conversion error, return a specific message
+          if (err instanceof Error && err.name === 'CastError') {
+            return NextResponse.json({ error: "Invalid user ID format" }, { status: 400 });
+          }
+
           return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
         }
       }
     } else if (action === 'my') {
-      // Handle user's bookings
-      if (session.user.role === "provider") {
+      // Handle user's own bookings (bookings made by the user)
+      if (session.user.role === "user") {
         try {
           await connectDataBase();
 
-          const vehicles = await bookings.find({
-            user_id: session.user.id,
-            providerasUserDeleted: false,
-          });
+          // Validate and convert session user ID to ObjectId for comparison
+          if (!mongoose.Types.ObjectId.isValid(session.user.id)) {
+            console.error("Invalid user ID in session:", session.user.id);
+            return NextResponse.json({ error: "Invalid user ID" }, { status: 400 });
+          }
 
-          return NextResponse.json(vehicles);
-        } catch (err) {
-          console.error(err);
-          return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
-        }
-      } else if (session.user.role === "user") {
-        try {
-          await connectDataBase();
-
-          const vehicles = await bookings.find({
-            user_id: session.user.id,
+          const userIdAsObjectId = new mongoose.Types.ObjectId(session.user.id);
+          const userBookings = await bookings.find({
+            user_id: userIdAsObjectId,
             userDeleted: false,
           });
 
-          return NextResponse.json(vehicles);
+          return NextResponse.json(userBookings);
         } catch (err) {
           console.error(err);
+
+          // If it's an ObjectId conversion error, return a specific message
+          if (err instanceof Error && err.name === 'CastError') {
+            return NextResponse.json({ error: "Invalid user ID format" }, { status: 400 });
+          }
+
+          return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+        }
+      } else if (session.user.role === "provider") {
+        // Provider's own bookings (when provider rents other people's vehicles)
+        try {
+          await connectDataBase();
+
+          // Validate and convert session user ID to ObjectId for comparison
+          if (!mongoose.Types.ObjectId.isValid(session.user.id)) {
+            console.error("Invalid user ID in session:", session.user.id);
+            return NextResponse.json({ error: "Invalid user ID" }, { status: 400 });
+          }
+
+          const userIdAsObjectId = new mongoose.Types.ObjectId(session.user.id);
+          const providerBookings = await bookings.find({
+            user_id: userIdAsObjectId,
+            providerasUserDeleted: false,
+          });
+
+          return NextResponse.json(providerBookings);
+        } catch (err) {
+          console.error(err);
+
+          // If it's an ObjectId conversion error, return a specific message
+          if (err instanceof Error && err.name === 'CastError') {
+            return NextResponse.json({ error: "Invalid user ID format" }, { status: 400 });
+          }
+
           return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
         }
       }
@@ -81,9 +124,11 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     await connectDataBase();
-    const { pathname } = new URL(request.url);
-    const pathSegments = pathname.split('/');
-    const action = pathSegments[pathSegments.length - 1];
+    const url = new URL(request.url);
+    const pathname = url.pathname;
+    // Get the last non-empty segment as the action
+    const pathSegments = pathname.split('/').filter(segment => segment !== '');
+    const action = pathSegments[pathSegments.length - 1] || '';
 
     if (action === 'update') {
       // Handle booking updates

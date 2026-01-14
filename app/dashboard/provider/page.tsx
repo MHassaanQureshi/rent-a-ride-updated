@@ -23,7 +23,7 @@ interface VehicleType {
   image: string[];
   fromavailabilityDate: string;
   toavailabilityDate: string;
-  
+
 }
 
 interface BookingType {
@@ -194,7 +194,7 @@ export default function Provider() {
         let errorMessage = "Vehicle not deleted";
         try {
           const errorData = await response.json();
-          errorMessage = errorData.message || errorMessage;
+          errorMessage = errorData.message || errorData.error || errorMessage;
         } catch (e) {
           // If response is not JSON, use default message
         }
@@ -252,6 +252,8 @@ export default function Provider() {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {vehicles.map((vehicle) => {
                       const availabilityColors: Record<string, string> = {
+                        'yes': 'bg-green-100 text-green-800',
+                        'no': 'bg-red-100 text-red-800',
                         'available': 'bg-green-100 text-green-800',
                         'not available': 'bg-red-100 text-red-800',
                         'maintenance': 'bg-yellow-100 text-yellow-800',

@@ -105,21 +105,24 @@ export default function Bookings(){
        }
         const deleteBooking = async(id:string)=>{
     try{
-    const data = await fetch(`/api/bookings/delete/${id}`,{
+    const data = await fetch(`/api/bookings/${id}`,{
       method:"DELETE"
     });
     if(data.ok){
-        alert("vehicle deleted")
+        alert("booking deleted")
+        // Refresh the bookings list
+        const updatedBookings = bookings.filter(booking => booking._id !== id);
+        setBookings(updatedBookings);
       
         
     }
     if(!data.ok){
-        alert("vehicle not deleted")
+        alert("booking not deleted")
         
     }
   }
     catch(e){
-      alert(`failed to delete user ${e}`)
+      alert(`failed to delete booking ${e}`)
     }
    }
    const updateuser = async(id:string)=>{
@@ -134,19 +137,20 @@ export default function Bookings(){
           body: JSON.stringify({id})
     });
     if(data.ok){
-        alert("vehicle deleted")
-      
-        
+        alert("booking deleted")
+        // Refresh the bookings list
+        const updatedBookings = bookings.filter(booking => booking._id !== id);
+        setBookings(updatedBookings);
     }
     if(!data.ok){
-        alert("vehicle not deleted")
+        alert("booking not deleted")
         router.refresh()
           
         
     }
   }
     catch(e){
-      alert(`failed to delete user ${e}`)
+      alert(`failed to delete booking ${e}`)
     }
    }
 

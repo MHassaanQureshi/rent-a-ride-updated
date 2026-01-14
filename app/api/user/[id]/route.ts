@@ -3,6 +3,7 @@ import User from "@/models/user";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { authOptions } from "@/lib/auth";
+import mongoose from "mongoose";
 
 export async function GET(
   req: NextRequest,
@@ -12,6 +13,35 @@ export async function GET(
     await connectDataBase();
 
     const { id } = await params;
+
+    // Special handling for reserved action names
+    if (id === 'my') {
+      // This should be handled by the main user route, but if it reaches here:
+      const session = await getServerSession(authOptions);
+
+      if (!session?.user?.id) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+
+      // Validate the session user ID
+      if (!mongoose.Types.ObjectId.isValid(session.user.id)) {
+        console.error("Invalid user ID in session:", session.user.id);
+        return NextResponse.json({ error: "Invalid user ID" }, { status: 400 });
+      }
+
+      const user = await User.findById(session.user.id);
+      if (!user) {
+        return NextResponse.json({ error: "User not found" }, { status: 404 });
+      }
+
+      return NextResponse.json(user);
+    }
+
+    // Validate that the ID is a proper ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      console.error("Invalid user ID:", id);
+      return NextResponse.json({ error: "Invalid user ID" }, { status: 400 });
+    }
 
     // Get specific user by ID
     const user = await User.findById(id);
@@ -36,6 +66,40 @@ export async function POST(
 
     const { id } = await params;
     const body = await req.json();
+
+    // Special handling for reserved action names
+    if (id === 'my') {
+      // This should be handled by the main user route, but if it reaches here:
+      const session = await getServerSession(authOptions);
+
+      if (!session?.user?.id) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+
+      // Validate the session user ID
+      if (!mongoose.Types.ObjectId.isValid(session.user.id)) {
+        console.error("Invalid user ID in session:", session.user.id);
+        return NextResponse.json({ error: "Invalid user ID" }, { status: 400 });
+      }
+
+      // Update user using session ID, not the "id" parameter
+      const updatedUser = await User.findByIdAndUpdate(session.user.id, body, { new: true });
+
+      if (!updatedUser) {
+        return NextResponse.json({ message: "User not found" }, { status: 404 });
+      }
+
+      return NextResponse.json({
+        message: "User updated successfully",
+        data: updatedUser
+      });
+    }
+
+    // Validate that the ID is a proper ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      console.error("Invalid user ID:", id);
+      return NextResponse.json({ error: "Invalid user ID" }, { status: 400 });
+    }
 
     // Update specific user by ID
     const updatedUser = await User.findByIdAndUpdate(id, body, { new: true });
@@ -62,6 +126,40 @@ export async function DELETE(
     await connectDataBase();
 
     const { id } = await params;
+
+    // Special handling for reserved action names
+    if (id === 'my') {
+      // This should be handled by the main user route, but if it reaches here:
+      const session = await getServerSession(authOptions);
+
+      if (!session?.user?.id) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+
+      // Validate the session user ID
+      if (!mongoose.Types.ObjectId.isValid(session.user.id)) {
+        console.error("Invalid user ID in session:", session.user.id);
+        return NextResponse.json({ error: "Invalid user ID" }, { status: 400 });
+      }
+
+      // Delete user using session ID, not the "id" parameter
+      const deletedUser = await User.findByIdAndDelete(session.user.id);
+
+      if (!deletedUser) {
+        return NextResponse.json({ message: "User not found" }, { status: 404 });
+      }
+
+      return NextResponse.json({
+        message: "User deleted successfully",
+        data: deletedUser
+      });
+    }
+
+    // Validate that the ID is a proper ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      console.error("Invalid user ID:", id);
+      return NextResponse.json({ error: "Invalid user ID" }, { status: 400 });
+    }
 
     // Delete specific user by ID
     const deletedUser = await User.findByIdAndDelete(id);

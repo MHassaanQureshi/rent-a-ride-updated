@@ -29,21 +29,24 @@ export default function BookingReceived(){
       const router = useRouter();
        const deleteBooking = async(id:string)=>{
     try{
-    const data = await fetch(`/api/bookings/delete/${id}`,{
+    const data = await fetch(`/api/bookings/${id}`,{
       method:"DELETE"
     });
     if(data.ok){
-        alert("vehicle deleted")
+        alert("booking deleted")
+        // Refresh the bookings list
+        const updatedBookings = bookingsreceived.filter(booking => booking._id !== id);
+        setBookingsreceived(updatedBookings);
       
         
     }
     if(!data.ok){
-        alert("vehicle not deleted")
+        alert("booking not deleted")
         
     }
   }
     catch(e){
-      alert(`failed to delete user ${e}`)
+      alert(`failed to delete booking ${e}`)
     }
     finally{
       setLoading(false)

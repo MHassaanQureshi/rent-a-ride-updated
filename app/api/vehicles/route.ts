@@ -10,9 +10,11 @@ import mongoose from "mongoose";
 export async function GET(request: NextRequest) {
   try {
     await connectDataBase();
-    const { pathname } = new URL(request.url);
-    const pathSegments = pathname.split('/');
-    const action = pathSegments[pathSegments.length - 1];
+    const url = new URL(request.url);
+    const pathname = url.pathname;
+    // Get the last non-empty segment as the action
+    const pathSegments = pathname.split('/').filter(segment => segment !== '');
+    const action = pathSegments[pathSegments.length - 1] || '';
 
     if (action === 'my') {
       // Handle fetching user's vehicles
@@ -52,7 +54,7 @@ export async function GET(request: NextRequest) {
       const vehicletype = searchParams.get("vehicletype");
       const fueltype = searchParams.get("fueltype");
       const maxprice = searchParams.get("maxprice");
-      const minprice = searchParams.get("minpirce");
+      const minprice = searchParams.get("minprice");
 
       const filter: {
         Vehicletype?: string,
@@ -78,25 +80,9 @@ export async function GET(request: NextRequest) {
       try {
         await connectDataBase();
 
-        if (vehicletype) {
-          const vehicles = await Vehicle.find({ Vehicletype: vehicletype });
-          return NextResponse.json(vehicles, { status: 200 });
-        }
-        if (fueltype) {
-          const vehicles = await Vehicle.find({ fuel_type: fueltype });
-          return NextResponse.json(vehicles, { status: 200 });
-        }
-        if (minprice) {
-          const vehicles = await Vehicle.find({ price: { $gte: Number(minprice) } });
-          return NextResponse.json(vehicles, { status: 200 });
-        }
-        if (maxprice) {
-          const vehicles = await Vehicle.find({ price: { $lte: Number(maxprice) } });
-          return NextResponse.json(vehicles, { status: 200 });
-        }
-        // If no filters applied, return all vehicles
-        const allVehicles = await Vehicle.find(filter);
-        return NextResponse.json(allVehicles, { status: 200 });
+        // Apply combined filters instead of returning early
+        const vehicles = await Vehicle.find(filter);
+        return NextResponse.json(vehicles, { status: 200 });
       } catch (error) {
         console.error("Filter error:", error);
         return NextResponse.json({ error: "Internal server error" }, { status: 500 });
@@ -105,9 +91,8 @@ export async function GET(request: NextRequest) {
       // Handle getting all vehicles
       const session = await getServerSession(authOptions);
       await connectDataBase();
-      const body = await Vehicle.find();
-
-      return NextResponse.json(body);
+      const allVehicles = await Vehicle.find();
+      return NextResponse.json(allVehicles);
     }
   } catch (err) {
     console.error("Error fetching vehicles:", err);
@@ -118,9 +103,11 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     await connectDataBase();
-    const { pathname } = new URL(request.url);
-    const pathSegments = pathname.split('/');
-    const action = pathSegments[pathSegments.length - 1];
+    const url = new URL(request.url);
+    const pathname = url.pathname;
+    // Get the last non-empty segment as the action
+    const pathSegments = pathname.split('/').filter(segment => segment !== '');
+    const action = pathSegments[pathSegments.length - 1] || '';
 
     if (action === 'updatedates') {
       // Handle updating vehicle dates
@@ -165,9 +152,17 @@ export async function POST(request: NextRequest) {
         bookedtillDate
       } = await request.json();
 
+      // Validate provider_id if provided, otherwise use session user ID
+      let validatedProviderId = provider_id || session?.user?.id;
+
+      if (validatedProviderId && !mongoose.Types.ObjectId.isValid(validatedProviderId)) {
+        console.error("Invalid provider ID:", validatedProviderId);
+        return NextResponse.json({ message: "Invalid provider ID" }, { status: 400 });
+      }
+
       const vehicle = await Vehicle.create({
         name, model, fuel_type, color, description, price, image,
-        provider_id: provider_id || session?.user?.id, // Use session ID if not provided
+        provider_id: validatedProviderId,
         Vehicletype, fromavailabilityDate, toavailabilityDate, bookedfromDate, bookedtillDate
       });
 
@@ -182,8 +177,9 @@ export async function POST(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     await connectDataBase();
-    const { pathname } = new URL(request.url);
-    const pathSegments = pathname.split('/');
+    const url = new URL(request.url);
+    const pathname = url.pathname;
+    const pathSegments = pathname.split('/').filter(segment => segment !== '');
     const id = pathSegments[pathSegments.length - 1]; // Extract ID from path
 
     try {
@@ -194,12 +190,24 @@ export async function DELETE(request: NextRequest) {
         );
       }
 
+      // Validate the ID as ObjectId
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        console.error("Invalid vehicle ID:", id);
+        return NextResponse.json(
+          { message: "Invalid vehicle ID" },
+          { status: 400 }
+        );
+      }
+
+      // Convert id to ObjectId for database operations
+      const vehicleId = new mongoose.Types.ObjectId(id);
+
       // Delete the vehicle
-      const deletedItem = await Vehicle.findByIdAndDelete(id);
+      const deletedItem = await Vehicle.findByIdAndDelete(vehicleId);
 
       // Delete related bookings
       const deleteBookingResult = await bookings.deleteMany({
-        Vehicle_id: id
+        Vehicle_id: vehicleId
       });
 
       if (!deletedItem) {

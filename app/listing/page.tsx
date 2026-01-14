@@ -52,7 +52,15 @@ export default function Listing() {
     setLoading(true);
     setSelectedVehicleType(type);
     try {
-      const data = await fetch(`/api/vehicles/filter?vehicletype=${type}`);
+      // Build the query string with both filters
+      const queryParams = new URLSearchParams();
+      if (type !== "all") queryParams.append("vehicletype", type);
+      if (selectedFuelType !== "all") queryParams.append("fueltype", selectedFuelType);
+
+      let queryString = queryParams.toString();
+      if (queryString) queryString = "?" + queryString;
+
+      const data = await fetch(`/api/vehicles/filter${queryString}`);
       if (data.ok) {
         const body = await data.json();
         setvehicle(body);
@@ -69,7 +77,15 @@ export default function Listing() {
     setLoading(true);
     setSelectedFuelType(type);
     try {
-      const data = await fetch(`/api/vehicles/filter?fueltype=${type}`);
+      // Build the query string with both filters
+      const queryParams = new URLSearchParams();
+      if (selectedVehicleType !== "all") queryParams.append("vehicletype", selectedVehicleType);
+      if (type !== "all") queryParams.append("fueltype", type);
+
+      let queryString = queryParams.toString();
+      if (queryString) queryString = "?" + queryString;
+
+      const data = await fetch(`/api/vehicles/filter${queryString}`);
       if (data.ok) {
         const body = await data.json();
         setvehicle(body);
@@ -129,7 +145,22 @@ export default function Listing() {
                   icon={<Filter className="w-4 h-4" />}
                   label="All"
                   active={selectedVehicleType === "all"}
-                  onClick={() => { setSelectedVehicleType("all"); fetchData(); }}
+                  onClick={() => {
+                  setSelectedVehicleType("all");
+                  // Apply remaining filter (fuel type) or fetch all if no other filters
+                  if (selectedFuelType !== "all") {
+                    const data = fetch(`/api/vehicles/filter?fueltype=${selectedFuelType}`);
+                    data.then(res => {
+                      if (res.ok) {
+                        res.json().then(body => setvehicle(body));
+                      } else {
+                        alert("filter failed");
+                      }
+                    }).catch(err => console.error(err));
+                  } else {
+                    fetchData(); // fetch all if both filters are "all"
+                  }
+                }}
                 />
                 <FilterButton
                   icon={<Car className="w-4 h-4" />}
@@ -160,7 +191,22 @@ export default function Listing() {
                   icon={<Filter className="w-4 h-4" />}
                   label="All"
                   active={selectedFuelType === "all"}
-                  onClick={() => { setSelectedFuelType("all"); fetchData(); }}
+                  onClick={() => {
+                  setSelectedFuelType("all");
+                  // Apply remaining filter (vehicle type) or fetch all if no other filters
+                  if (selectedVehicleType !== "all") {
+                    const data = fetch(`/api/vehicles/filter?vehicletype=${selectedVehicleType}`);
+                    data.then(res => {
+                      if (res.ok) {
+                        res.json().then(body => setvehicle(body));
+                      } else {
+                        alert("filter failed");
+                      }
+                    }).catch(err => console.error(err));
+                  } else {
+                    fetchData(); // fetch all if both filters are "all"
+                  }
+                }}
                 />
                 <FilterButton
                   icon={<Fuel className="w-4 h-4" />}
