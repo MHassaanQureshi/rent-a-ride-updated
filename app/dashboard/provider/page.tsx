@@ -223,14 +223,14 @@ export default function Provider() {
 
   return (
     <>
-      <div className="flex flex-col md:flex-row w-full min-h-screen bg-gray-50 text-gray-900">
+      <div className="flex flex-col md:flex-row w-full min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-white">
 
-        <aside className="md:w-1/4 w-full bg-white text-gray-900 p-4 border-r border-gray-200">
+        <aside className="md:w-1/4 w-full bg-white dark:bg-gray-900 text-gray-900 dark:text-white p-4 border-r border-gray-200 dark:border-gray-800">
           <DashboardNav />
         </aside>
 
 
-        <main className="md:w-3/4 w-full p-4 bg-gray-50 min-h-screen">
+        <main className="md:w-3/4 w-full p-6 bg-gray-50 dark:bg-gray-950 min-h-screen">
           <div className="max-w-full">
             {/* Bookings You Have Received */}
            <BookingReceived />
@@ -240,66 +240,66 @@ export default function Provider() {
             {/* Vehicles */}
             {session?.user?.role === "provider" && (
               <section className="mt-10">
-                <h2 className="text-xl md:text-2xl font-semibold text-gray-900 mb-6">
+                <h2 className="h2 text-gray-900 dark:text-white mb-6">
                   Your Vehicles
                 </h2>
 
                 {vehicles.length === 0 ? (
-                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
-                    <p className="text-gray-500">No vehicles found. Add your first vehicle!</p>
+                  <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 p-12 text-center">
+                    <p className="body-large text-gray-600 dark:text-gray-400">No vehicles found. Add your first vehicle!</p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {vehicles.map((vehicle) => {
                       const availabilityColors: Record<string, string> = {
-                        'yes': 'bg-green-100 text-green-800',
-                        'no': 'bg-red-100 text-red-800',
-                        'available': 'bg-green-100 text-green-800',
-                        'not available': 'bg-red-100 text-red-800',
-                        'maintenance': 'bg-yellow-100 text-yellow-800',
-                        'booked': 'bg-blue-100 text-blue-800',
+                        'yes': 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200',
+                        'no': 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200',
+                        'available': 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200',
+                        'not available': 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200',
+                        'maintenance': 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200',
+                        'booked': 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200',
                       };
 
                       return (
-                        <div key={vehicle._id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                        <div key={vehicle._id} className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 p-6 hover:shadow-lg transition-all duration-200 lift-hover">
                           <div className="flex justify-between items-start mb-4">
-                            <h3 className="font-semibold text-gray-900 text-lg">{vehicle.name}</h3>
-                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${availabilityColors[vehicle.availability.toLowerCase()] || 'bg-gray-100 text-gray-800'}`}>
+                            <h3 className="font-semibold text-gray-900 dark:text-white text-lg">{vehicle.name}</h3>
+                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${availabilityColors[vehicle.availability.toLowerCase()] || 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200'}`}>
                               {vehicle.availability}
                             </span>
                           </div>
 
                           <div className="space-y-3 mb-6">
                             <div className="flex justify-between text-sm">
-                              <span className="text-gray-500">Model</span>
-                              <span className="font-medium">{vehicle.model}</span>
+                              <span className="text-gray-500 dark:text-gray-400">Model</span>
+                              <span className="font-medium text-gray-900 dark:text-white">{vehicle.model}</span>
                             </div>
                             <div className="flex justify-between text-sm">
-                              <span className="text-gray-500">Color</span>
-                              <span className="font-medium">{vehicle.color}</span>
+                              <span className="text-gray-500 dark:text-gray-400">Color</span>
+                              <span className="font-medium text-gray-900 dark:text-white">{vehicle.color}</span>
                             </div>
                             <div className="flex justify-between text-sm">
-                              <span className="text-gray-500">Fuel Type</span>
-                              <span className="font-medium">{vehicle.fuel_type}</span>
+                              <span className="text-gray-500 dark:text-gray-400">Fuel Type</span>
+                              <span className="font-medium text-gray-900 dark:text-white">{vehicle.fuel_type}</span>
                             </div>
                             <div className="flex justify-between text-sm">
-                              <span className="text-gray-500">Price</span>
-                              <span className="font-medium">${vehicle.price}/day</span>
+                              <span className="text-gray-500 dark:text-gray-400">Price</span>
+                              <span className="font-medium text-gray-900 dark:text-white">${vehicle.price}/day</span>
                             </div>
                             <div className="flex justify-between text-sm">
-                              <span className="text-gray-500">Availability</span>
-                              <span className="font-medium">{formatDate(vehicle.fromavailabilityDate)} - {formatDate(vehicle.toavailabilityDate)}</span>
+                              <span className="text-gray-500 dark:text-gray-400">Availability</span>
+                              <span className="font-medium text-gray-900 dark:text-white">{formatDate(vehicle.fromavailabilityDate)} - {formatDate(vehicle.toavailabilityDate)}</span>
                             </div>
                           </div>
 
                           <div className="flex gap-2">
                             <Link href={`/editvehicle/${vehicle._id}`}>
-                              <button className="flex-1 bg-blue-600 text-white py-2 px-3 rounded text-sm hover:bg-blue-700 transition-colors min-w-[80px]">
+                              <button className="flex-1 bg-blue-500 text-white py-2 px-3 rounded-lg text-sm hover:bg-blue-600 transition-colors min-w-[80px] lift-hover">
                                 Update
                               </button>
                             </Link>
                             <button
-                              className="flex-1 bg-red-600 text-white py-2 px-3 rounded text-sm hover:bg-red-700 transition-colors min-w-[80px]"
+                              className="flex-1 bg-red-500 text-white py-2 px-3 rounded-lg text-sm hover:bg-red-600 transition-colors min-w-[80px] lift-hover"
                               onClick={() => {
                                 deleteVehicle(vehicle._id);
                               }}

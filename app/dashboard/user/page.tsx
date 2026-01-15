@@ -156,34 +156,34 @@ export default function User() {
 if(loading) return <Loader />
 
   return(
-    <div className="flex flex-col md:flex-row w-full min-h-screen bg-gray-50 text-gray-900">
-      <aside className="md:w-1/4 w-full bg-white text-gray-900 p-4 border-r border-gray-200">
+    <div className="flex flex-col md:flex-row w-full min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-white">
+      <aside className="md:w-1/4 w-full bg-white dark:bg-gray-900 text-gray-900 dark:text-white p-4 border-r border-gray-200 dark:border-gray-800">
         <DashboardNav />
       </aside>
 
-      <main className="md:w-3/4 w-full p-4 bg-gray-50 min-h-screen">
+      <main className="md:w-3/4 w-full p-6 bg-gray-50 dark:bg-gray-950 min-h-screen">
         <div className="max-w-full">
           {/* User Bookings Section */}
           <section className="mb-10">
-            <h2 className="text-xl md:text-2xl font-semibold text-gray-900 mb-6">
+            <h2 className="h2 text-gray-900 dark:text-white mb-6">
               Your Bookings
             </h2>
 
             {bookings.length === 0 ? (
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
-                <p className="text-gray-500">No bookings found. Start by renting a vehicle!</p>
+              <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 p-12 text-center">
+                <p className="body-large text-gray-600 dark:text-gray-400">No bookings found. Start by renting a vehicle!</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {bookings.map((booking) => {
                   const statusColors: Record<string, string> = {
-                    'Booked Waiting for initial Payment': 'bg-amber-100 text-amber-800',
-                    'Booked Waiting for Confirmation': 'bg-blue-100 text-blue-800',
-                    'Accepted Waiting for Delivery': 'bg-indigo-100 text-indigo-800',
-                    'Delivered': 'bg-purple-100 text-purple-800',
-                    'received': 'bg-green-100 text-green-800',
-                    'Cancelled': 'bg-red-100 text-red-800',
-                    'Declined': 'bg-gray-100 text-gray-800',
+                    'Booked Waiting for initial Payment': 'bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200',
+                    'Booked Waiting for Confirmation': 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200',
+                    'Accepted Waiting for Delivery': 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-200',
+                    'Delivered': 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200',
+                    'received': 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200',
+                    'Cancelled': 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200',
+                    'Declined': 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200',
                   };
 
                   const isCancelable = ![
@@ -199,37 +199,37 @@ if(loading) return <Loader />
                   ].includes(booking.Delivery_status);
 
                   return (
-                    <div key={booking._id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                    <div key={booking._id} className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 p-6 hover:shadow-lg transition-all duration-200 lift-hover">
                       <div className="flex justify-between items-start mb-4">
-                        <h3 className="font-semibold text-gray-900 text-lg">{booking.vehicle_name}</h3>
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusColors[booking.Delivery_status] || 'bg-gray-100 text-gray-800'}`}>
+                        <h3 className="font-semibold text-gray-900 dark:text-white text-lg">{booking.vehicle_name}</h3>
+                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusColors[booking.Delivery_status] || 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200'}`}>
                           {booking.Delivery_status}
                         </span>
                       </div>
 
                       <div className="space-y-3 mb-6">
                         <div className="flex justify-between text-sm">
-                          <span className="text-gray-500">Rental Period</span>
-                          <span className="font-medium">{formatDate(booking.startDate)} - {formatDate(booking.endDate)}</span>
+                          <span className="text-gray-500 dark:text-gray-400">Rental Period</span>
+                          <span className="font-medium text-gray-900 dark:text-white">{formatDate(booking.startDate)} - {formatDate(booking.endDate)}</span>
                         </div>
                         <div className="flex justify-between text-sm">
-                          <span className="text-gray-500">Total Amount</span>
-                          <span className="font-medium">${booking.totalprice}</span>
+                          <span className="text-gray-500 dark:text-gray-400">Total Amount</span>
+                          <span className="font-medium text-gray-900 dark:text-white">${booking.totalprice}</span>
                         </div>
                         <div className="flex justify-between text-sm">
-                          <span className="text-gray-500">Customer</span>
-                          <span className="font-medium">{booking.name}</span>
+                          <span className="text-gray-500 dark:text-gray-400">Customer</span>
+                          <span className="font-medium text-gray-900 dark:text-white">{booking.name}</span>
                         </div>
                         <div className="flex justify-between text-sm">
-                          <span className="text-gray-500">Contact</span>
-                          <span className="font-medium">{booking.phone}</span>
+                          <span className="text-gray-500 dark:text-gray-400">Contact</span>
+                          <span className="font-medium text-gray-900 dark:text-white">{booking.phone}</span>
                         </div>
                       </div>
 
                       <div className="flex flex-wrap gap-2">
                         {isCancelable && (
                           <button
-                            className="flex-1 bg-red-600 text-white py-2 px-3 rounded text-sm hover:bg-red-700 transition-colors min-w-[80px]"
+                            className="flex-1 bg-red-500 text-white py-2 px-3 rounded-lg text-sm hover:bg-red-600 transition-colors min-w-[80px] lift-hover"
                             onClick={() =>
                               updateVehicleStatus(
                                 booking._id,
@@ -249,7 +249,7 @@ if(loading) return <Loader />
 
                         {isReceivable && (
                           <button
-                            className="flex-1 bg-green-600 text-white py-2 px-3 rounded text-sm hover:bg-green-700 transition-colors min-w-[80px]"
+                            className="flex-1 bg-green-500 text-white py-2 px-3 rounded-lg text-sm hover:bg-green-600 transition-colors min-w-[80px] lift-hover"
                             onClick={() => updateVehicleStatus(booking._id, "received")}
                             disabled={
                               booking.Delivery_status === "Cancelled" ||
@@ -271,7 +271,7 @@ if(loading) return <Loader />
                          booking.Delivery_status === "Declined" ||
                          booking.Delivery_status === "received") && (
                           <button
-                            className="flex-1 bg-red-600 text-white py-2 px-3 rounded text-sm hover:bg-red-700 transition-colors min-w-[80px]"
+                            className="flex-1 bg-red-500 text-white py-2 px-3 rounded-lg text-sm hover:bg-red-600 transition-colors min-w-[80px] lift-hover"
                             onClick={() => {
                               deleteBooking(booking._id);
                             }}
