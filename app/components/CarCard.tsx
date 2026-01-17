@@ -58,7 +58,7 @@ const checkowner=(id:string)=>{
 }
   return (
     <div className="w-full max-w-6xl mx-auto p-4 bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-lg rounded-2xl overflow-hidden mt-10">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Image Gallery Section */}
         <div className="relative bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4">
           <img
@@ -69,24 +69,24 @@ const checkowner=(id:string)=>{
 
           <button
             onClick={prevImage}
-            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white bg-blue-500 hover:bg-blue-600 p-2 rounded-full shadow-lg transition-all duration-200"
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white bg-blue-500 hover:bg-blue-600 p-2 rounded-full shadow-lg transition-all duration-200 z-10"
           >
             ❮
           </button>
           <button
             onClick={nextImage}
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white bg-blue-500 hover:bg-blue-600 p-2 rounded-full shadow-lg transition-all duration-200"
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white bg-blue-500 hover:bg-blue-600 p-2 rounded-full shadow-lg transition-all duration-200 z-10"
           >
             ❯
           </button>
 
-          <div className="flex justify-center gap-2 mt-4">
+          <div className="flex justify-center gap-2 mt-4 overflow-x-auto pb-2">
             {vehicle.image.map((imgSrc, i) => (
               <img
                 key={i}
                 src={imgSrc}
                 alt={`Thumb ${i}`}
-                className={`w-16 h-16 object-cover rounded-lg border-2 cursor-pointer transition-all duration-200 ${
+                className={`w-16 h-16 object-cover rounded-lg border-2 cursor-pointer transition-all duration-200 flex-shrink-0 ${
                   i === currentIndex
                     ? 'border-blue-500 dark:border-blue-400 ring-2 ring-blue-300 dark:ring-blue-700 scale-105'
                     : 'border-transparent hover:border-blue-300 dark:hover:border-blue-600'
@@ -98,16 +98,16 @@ const checkowner=(id:string)=>{
         </div>
 
         {/* Details Section */}
-        <div className="flex flex-col justify-between p-6 bg-white dark:bg-gray-800/30">
+        <div className="flex flex-col justify-between p-4 sm:p-6 bg-white dark:bg-gray-800/30">
           <div className="space-y-4">
             <div>
-              <h1 className="h2 text-gray-900 dark:text-white">{vehicle.name}</h1>
-              <h2 className="text-lg text-gray-600 dark:text-gray-300 mt-1">Model: {vehicle.model}</h2>
+              <h1 className="h2 text-gray-900 dark:text-white break-words">{vehicle.name}</h1>
+              <h2 className="text-lg text-gray-600 dark:text-gray-300 mt-1 break-words">Model: {vehicle.model}</h2>
             </div>
 
             <p className="body-regular text-gray-600 dark:text-gray-400">{vehicle.description}</p>
 
-            <div className="grid grid-cols-2 gap-4 mt-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
               <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
                 <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
                   <span
@@ -135,13 +135,13 @@ const checkowner=(id:string)=>{
             </div>
 
             <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-              <div className="flex justify-between items-center">
-                <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 p-4 rounded-xl border border-blue-200 dark:border-blue-800/50">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 p-4 rounded-xl border border-blue-200 dark:border-blue-800/50 w-full sm:w-auto">
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Daily Rate</p>
                   <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">${vehicle.price}</p>
                 </div>
 
-                <div className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700/50 p-4 rounded-xl border border-gray-200 dark:border-gray-700">
+                <div className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700/50 p-4 rounded-xl border border-gray-200 dark:border-gray-700 w-full sm:w-auto">
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Provider</p>
                   <p className="font-medium text-gray-900 dark:text-white">{providername}</p>
                 </div>

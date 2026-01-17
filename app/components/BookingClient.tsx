@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import CarCard from "@/app/components/CarCard";
 import Link from "next/link";
 import { Calendar } from "@/components/ui/calendar";
 
@@ -15,7 +14,7 @@ interface VehicleType {
   color: string;
   description: string;
   price: number;
-  image: [];
+  image: string[];
   fromavailabilityDate: string;
   toavailabilityDate: string;
   availability: string;
@@ -122,14 +121,25 @@ export default function BookingClient({ vehicle, providername }: props) {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="space-y-8">
-        {/* Car Card */}
-        <div>
-          <CarCard vehicle={vehicle} providername={providername} />
-        </div>
-
         {/* Booking Form */}
         {status === "authenticated" && (
           <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-800">
+            {/* Compact Vehicle Info */}
+            <div className="mb-6 pb-4 border-b border-gray-200 dark:border-gray-700">
+              <div className="flex items-center gap-4">
+                {vehicle.image && vehicle.image.length > 0 && (
+                  <img
+                    src={vehicle.image[0]}
+                    alt={vehicle.name}
+                    className="w-16 h-16 object-cover rounded-lg"
+                  />
+                )}
+                <div>
+                  <h2 className="h3 text-gray-900 dark:text-white">{vehicle.name}</h2>
+                  <p className="text-gray-600 dark:text-gray-400">Model: {vehicle.model} • ${vehicle.price}/day</p>
+                </div>
+              </div>
+            </div>
             <h2 className="h2 text-gray-900 dark:text-white mb-6 text-center">Complete Your Booking</h2>
 
             <form onSubmit={handleSubmit} className="space-y-8">
